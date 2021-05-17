@@ -9,11 +9,11 @@ import re
 
 def start_driver(headless=True):
     if not headless:
-        return webdriver.Chrome('/Users/gowtham/projects/personal/data/BigBasket-Scrapper/chromedriver')
+        return webdriver.Chrome('./chromedriver')
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
-    return webdriver.Chrome('/Users/gowtham/projects/personal/data/BigBasket-Scrapper/chromedriver', options=chrome_options)
+    return webdriver.Chrome('./chromedriver', options=chrome_options)
 
 
 def save_image(image_link, save_dir):
