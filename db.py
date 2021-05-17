@@ -5,7 +5,7 @@ class DB:
 
     def __init__(self):
         self.conn = pymysql.connect(
-            host='127.0.0.1', port=3306, user='root', passwd='youwish', db='bbdata', charset='utf8mb4')
+            host='127.0.0.1', port=3306, user='root', passwd='password', db='bbdata', charset='utf8mb4')
         self.cur = self.conn.cursor()
         self.currentcityid = None
         sql = 'Select * FROM cities'
