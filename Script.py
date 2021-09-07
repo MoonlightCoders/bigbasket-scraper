@@ -69,7 +69,8 @@ def get_product_data(driver1, product, raw_data_file):
     product_data['Image 1'] = image_large
 
     pack_sizes = list()
-    if (driver1.find_elements_by_id('_2WW4W')[0].text == 'Pack Sizes') :
+    element = driver1.find_elements_by_id('_2WW4W')
+    if (element and element[0].text == 'Pack Sizes') :
         packs = driver1.find_elements_by_class_name("_2Z6Vt")
 
         for pack in packs :
@@ -79,10 +80,16 @@ def get_product_data(driver1, product, raw_data_file):
                 'Selling price': pack.find_elements_by_id('_2j_7u')[0].text.replace('Rs ', ''),
             })
     else :
+        selling_price = (driver1.find_element_by_css_selector("td[data-qa='productPrice']").text).replace('Rs ', '')
+        mrp = selling_price
+        element = driver1.find_elements_by_css_selector("td[class='_2ifWF']")
+        if element and element[0] :
+            mrp = element[0].text.replace('Rs ', '')
+
         pack_sizes.append({
             'Pack Size': '',
-            'MRP': (driver1.find_element_by_css_selector("td[class='_2ifWF']").text).replace('Rs ', ''),
-            'Selling price': (driver1.find_element_by_css_selector("td[data-qa='productPrice']").text).replace('Rs ', ''),
+            'MRP': mrp,
+            'Selling price': selling_price,
         })
     # packs
 
