@@ -33,6 +33,7 @@ def get_product_data(driver1, product, raw_data_file):
     additional_fields = ['About the product', 'Ingredients', 'Composition', 'Nutritional Facts', 'How to use', 'Benefits', 'Specification', 'Care Instructions', 'Variable Weight Policy', 'Storage & Uses', 'EAN Code']
     driver1.get(full_link)
 
+    pack_sizes = []
     product_data = {}
     product_data['Product Code'] = link.split('/')[2]
     bread_crumbs = driver1.find_elements_by_class_name('_3WUR_')
@@ -41,11 +42,10 @@ def get_product_data(driver1, product, raw_data_file):
     product_data['Micro category'] = bread_crumbs[3].text
     product_data['Brand'] = driver1.find_element_by_css_selector("a[context='brandlabel']").text
     product_data['Product name'] = bread_crumbs[4].text
-    product_data['Pack Size'] = 'TODO'
-    product_data['MRP'] = (driver1.find_element_by_css_selector("td[data-qa='productPrice']").text).replace('Rs ', '')
-    product_data['Selling price'] = 'TODO'
+    product_data['Pack Size'] = ''
+    product_data['MRP'] = ''
+    product_data['Selling price'] = ''
 
-    
     additional_field_values = {}
     additions_infos = driver1.find_elements_by_class_name('_3ezVU')
     for index in range(len(additions_infos)) :
@@ -59,7 +59,7 @@ def get_product_data(driver1, product, raw_data_file):
 
     for field in additional_fields :
         value = additional_field_values.get(field)
-        product_data[field] = value
+        product_data[field] = value or ''
 
     img = product.find("img")['src']
     # image_small = img.replace('/media/uploads/p/mm/', '/media/uploads/p/s/')
@@ -68,6 +68,23 @@ def get_product_data(driver1, product, raw_data_file):
 
     product_data['Image 1'] = image_large
 
+    pack_sizes = list()
+    if (driver1.find_elements_by_id('_2WW4W')[0].text == 'Pack Sizes') :
+        packs = driver1.find_elements_by_class_name("_2Z6Vt")
+
+        for pack in packs :
+            pack_sizes.append({
+                'Pack Size': pack.find_elements_by_id('_3Yybm')[0].text,
+                'MRP': pack.find_elements_by_id('tQ1Iy')[0].text.replace('Rs ', ''),
+                'Selling price': pack.find_elements_by_id('_2j_7u')[0].text.replace('Rs ', ''),
+            })
+    else :
+        pack_sizes.append({
+            'Pack Size': '',
+            'MRP': (driver1.find_element_by_css_selector("td[class='_2ifWF']").text).replace('Rs ', ''),
+            'Selling price': (driver1.find_element_by_css_selector("td[data-qa='productPrice']").text).replace('Rs ', ''),
+        })
+    # packs
 
     # images = driver1.find_elements_by_class_name('_3oKVV')
     # for index in range(len(images)) :
@@ -77,9 +94,14 @@ def get_product_data(driver1, product, raw_data_file):
     # Quantity = product.find("span", {"data-bind": "label"}).text
     # Price = product.find("span", {"class": "discnt-price"}).text
 
-    with open(raw_data_file, "a") as f:
-        data = json.dumps(product_data)
-        f.write(data + "\n")
+    for pack in pack_sizes :
+        product_data['Pack Size'] = pack['Pack Size']
+        product_data['MRP'] = pack['MRP']
+        product_data['Selling price'] = pack['Selling price']
+
+        with open(raw_data_file, "a") as f:
+            data = json.dumps(product_data)
+            f.write(data + "\n")
 
     # try:
     #     save_image(image_small, os.path.join(OUTPUT_DIR, "images", "small"))
