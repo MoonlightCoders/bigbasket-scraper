@@ -30,42 +30,48 @@ def get_product_data(driver1, product, raw_data_file):
     full_link = 'https://www.bigbasket.com' + link
     print(full_link)
 
+    additional_fields = ['About the product', 'Ingredients', 'Composition', 'Nutritional Facts', 'How to use', 'Benefits', 'Specification', 'Care Instructions', 'Variable Weight Policy', 'Storage & Uses', 'EAN Code']
     driver1.get(full_link)
 
     product_data = {}
-    product_data['product_code'] = link.split('/')[2]
-    product_data['product_link'] = full_link
-
-    product_data['brand'] = driver1.find_element_by_css_selector("a[context='brandlabel']").text
-    product_data['product_price'] = (driver1.find_element_by_css_selector("td[data-qa='productPrice']").text).replace('Rs ', '')
-
+    product_data['Product Code'] = link.split('/')[2]
     bread_crumbs = driver1.find_elements_by_class_name('_3WUR_')
-    product_data['product_name'] = bread_crumbs[4].text
-    product_data['master_category'] = bread_crumbs[1].text
-    product_data['sub_category'] = bread_crumbs[2].text
-    product_data['micro_category'] = bread_crumbs[3].text
+    product_data['Master category'] = bread_crumbs[1].text
+    product_data['Sub Category'] = bread_crumbs[2].text
+    product_data['Micro category'] = bread_crumbs[3].text
+    product_data['Brand'] = driver1.find_element_by_css_selector("a[context='brandlabel']").text
+    product_data['Product name'] = bread_crumbs[4].text
+    product_data['Pack Size'] = 'TODO'
+    product_data['MRP'] = (driver1.find_element_by_css_selector("td[data-qa='productPrice']").text).replace('Rs ', '')
+    product_data['Selling price'] = 'TODO'
 
+    
+    additional_field_values = {}
     additions_infos = driver1.find_elements_by_class_name('_3ezVU')
     for index in range(len(additions_infos)) :
         additions_info = additions_infos[index]
         title = additions_info.find_element_by_class_name('_3LyVz').text
         description = additions_info.find_element_by_class_name('_26MFu').text
-        product_data[title] = description
+        additional_field_values[title] = description
 
         if title == 'Other Product Info' :
-            product_data["EAN Code"] = description.split('EAN Code: ')[1].split('\n')[0]
-            product_data[title] = product_data[title].split('For Queries/Feedback/')[0]
+            additional_field_values['EAN Code'] = description.split('EAN Code: ')[1].split('\n')[0]
 
-    images = driver1.find_elements_by_class_name('_3oKVV')
-    for index in range(len(images)) :
-        product_data['image_'+ str(index+1)] = images[index].get_attribute("src")
+    for field in additional_fields :
+        value = additional_field_values.get(field)
+        product_data[field] = value
 
-
-    # img = product.find("img")['src']
+    img = product.find("img")['src']
     # image_small = img.replace('/media/uploads/p/mm/', '/media/uploads/p/s/')
-    # image_large = img.replace('/media/uploads/p/s/', '/media/uploads/p/l/'). \
-    #     replace('/media/uploads/p/mm/', '/media/uploads/p/l/')
+    image_large = img.replace('/media/uploads/p/s/', '/media/uploads/p/l/'). \
+        replace('/media/uploads/p/mm/', '/media/uploads/p/l/')
 
+    product_data['Image 1'] = image_large
+
+
+    # images = driver1.find_elements_by_class_name('_3oKVV')
+    # for index in range(len(images)) :
+    #     product_data['image_'+ str(index+1)] = images[index].get_attribute("src")
     # Brand = product.find("div", {"qa": "product_name"}).find("h6").text
     # Product = product.find("div", {"qa": "product_name"}).find("a").text
     # Quantity = product.find("span", {"data-bind": "label"}).text
